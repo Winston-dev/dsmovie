@@ -30,7 +30,7 @@ function Listing() {
         const data = response.data as MoviePage;
         setPage(data);
         console.log(data)
-  //setPageNumber(data.number);*/
+      //setPageNumber(data.number);*/
       });
   }, [pageNumber]);
   const movie = {
@@ -42,9 +42,15 @@ function Listing() {
     score: 4.5,
   };
 
+
+  const handlePageChenge = (newPageNumber: number) => {
+    setPageNumber(newPageNumber);
+  }
+
+
   return (
     <>
-      <Pagination />
+      <Pagination page={ page } onChenge={handlePageChenge}/>
 
       <div className="container">
         <div className="row">
