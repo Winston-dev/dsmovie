@@ -1,33 +1,62 @@
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Movie } from 'types/movie';
-import { BASE_URL } from 'utils/request';
-import './styles.css'
+import axios, { AxiosRequestConfig } from "axios";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Movie } from "types/movie";
+import { BASE_URL } from "utils/request";
+import { validateEmail } from "utils/Validate";
+import "./styles.css";
 
 type Props = {
-  movieId: string}
+  movieId: string;
+};
 
+function FormCard({ movieId }: Props) {
+  const navigate = useNavigate();
 
-function FormCard({movieId}: Props) {
+  const [movie, setMovie] = useState<Movie>();
 
- const [movie, setMovie] = useState<Movie>();
+  useEffect(() => {
+    axios.get(`${BASE_URL}/movies/${movieId}`).then((response) => {
+      setMovie(response.data);
+    });
+  }, [movieId]);
 
- useEffect(() => {
-     axios.get(`${BASE_URL}/movies/${movieId}`).then(response => {
-         setMovie(response.data);
-     })
-  
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); //para o envio padrao
 
-     },[movieId]);
- 
+    const email = (event.target as any).email.value;
+    const score = (event.target as any).score.value;
+    //console.log(email, score);
+
+    if (!validateEmail(email)) {
+      return;
+    }
+    const config: AxiosRequestConfig = {
+      baseURL: BASE_URL,
+      method: "PUT",
+      url: "/scores",
+      data: {
+        email: email,
+        movieId: movieId,
+        score: score,
+      },
+    };
+    axios(config).then((response) => {
+      console.log(response.data);
+      navigate("/");
+    });
+  };
 
   return (
     <div className="dsmovie-form-container">
-      <img className="dsmovie-movie-card-image" src={movie?.image} alt={movie?.title} />
+      <img
+        className="dsmovie-movie-card-image"
+        src={movie?.image}
+        alt={movie?.title}
+      />
       <div className="dsmovie-card-bottom-container">
         <h3>{movie?.title}</h3>
-        <form className="dsmovie-form">
+        <form className="dsmovie-form" onSubmit={handleSubmit}>
           <div className="form-group dsmovie-form-group">
             <label htmlFor="email">Informe seu email</label>
             <input type="email" className="form-control" id="email" />
@@ -49,7 +78,7 @@ function FormCard({movieId}: Props) {
           </div>
         </form>
         <Link to="/">
-        <button className="btn btn-primary dsmovie-btn mt-3">Cancelar</button>
+          <button className="btn btn-primary dsmovie-btn mt-3">Cancelar</button>
         </Link>
       </div>
     </div>
